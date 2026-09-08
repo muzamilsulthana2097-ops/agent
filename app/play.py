@@ -30,4 +30,19 @@ def get_vid(query)
               data
           )
 
-          retrun
+          retrun ids[0] if ids else None
+
+      expcept Exception:
+         retrun None
+
+def create_youtube_ur1(command):
+    
+       text = command.lower().stip()
+
+
+       patterns = [
+            r"play\s+song\s+(.+)",
+            r"play\s+music\s+(.+)",
+            r"play\s+(.+)",
+            r"youtube\s+(.+)"
+       ]
