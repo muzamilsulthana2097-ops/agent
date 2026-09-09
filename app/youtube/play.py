@@ -3,64 +3,65 @@ import urllib.parse
 import urllib.request
 
 
-def get_vid(query)
+def get_vid(query):
 
     try:
-         encode = urllib.parse.quote(query)
+        encoded = urllib.parse.quote(query)
 
-         ur1 = (
-               "https://www.youtube.com/results"
-               "?search_query=" +encode
-         )
+        url = (
+            "https://www.youtube.com/results"
+            "?search_query=" + encoded
+        )
 
-          request = urllib.request.Request(
-              url,
-              headers=(
-                      "User- Agent": Mozilla/5.0"
-              }
-         )
+        request = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0"
+            }
+        )
 
-          data = urllib.request.urlopen(
-              request,
-              timeout=5
-          ).read().decode("utf-8",errors="ignore')
+        data = urllib.request.urlopen(
+            request,
+            timeout=5
+        ).read().decode("utf-8", errors="ignore")
 
-          ids = re.findall(
-              r'"videoId';"([^"]+)"',
-              data
-          )
+        ids = re.findall(
+            r'"videoId":"([^"]+)"',
+            data
+        )
 
-          retrun ids[0] if ids else None
+        return ids[0] if ids else None
 
-      expcept Exception:
-         retrun None
-
-def create_youtube_ur1(command):
-    
-       text = command.lower().stip()
+    except Exception:
+        return None
 
 
-       patterns = [
-            r"play\s+song\s+(.+)",
-            r"play\s+music\s+(.+)",
-            r"play\s+(.+)",                                                                                                                                                                                                 
-            r"youtube\s+(.+)"
-       ]
+def create_youtube_url(command):
 
-       query = command
+    text = command.lower().strip()
 
-       for pattern in patterns:
+    patterns = [
+        r"play\s+song\s+(.+)",
+        r"play\s+music\s+(.+)",
+        r"play\s+(.+)",
+        r"youtube\s+(.+)"
+    ]
 
-           match = research(
-                pattern,
-                text
-           )
+    query = command
 
-           if match :
-              query = match.group(1)
-               break
+    for pattern in patterns:
 
-      query = query.strip()
+        match = re.search(
+            pattern,
+            text
+        )
+
+        if match:
+
+            query = match.group(1)
+            break
+
+    query = query.strip()
 
     video_id = get_vid(query)
 
@@ -68,7 +69,7 @@ def create_youtube_ur1(command):
         return None
 
     return (
-         "https://www.youtube.com/embed/"
-          +video_id
-          +"?autoplay = 1&mute=0"
+        "https://www.youtube.com/embed/"
+        + video_id
+        + "?autoplay=1&mute=0"
     )
