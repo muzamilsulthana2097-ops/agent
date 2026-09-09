@@ -1,9 +1,10 @@
 <html>
 
-    <h2>Nova AI</h2>
-    <p>Say a song name</p>
-    <button id = "mic" class="mic">
-    </buttom>
-    <div id="status" class="status">
-        Tap microphone
+  <h2>Nova AI</h2>
+  <p>Say a song name</p>
+  <button id = "mic" class="mic">
+  </buttom>
+  <div id="status" class="status">
+      Tap microphone
+
 </html>
