@@ -24,3 +24,42 @@ def generate_email_with_gmail(command):
   - Do not invent names, dates, prices, companies, attachments, or facts.
   - Keep the email natural and concise
   - Include an appropriate greeting and closing
+
+  Output exactly:
+
+  SUBJECT:<subject>
+  BODY:
+  <email body>
+
+  User command:
+  {command}
+  """
+
+       url = (
+           f"https://generativelanguage.googleapis.com/"
+           f"v1beta/models/{MODEL}:generatecontent"
+       )
+
+       payload = {
+           "contents": [{"parts":[{"text": prompt}]}],
+           "generationConfig": {
+               "temperature":0.7,
+               "maxOutputTikens": 800
+           }
+       }
+
+ req = urllib.request.Request(
+     url,
+     data=json.dumps(payload).encode(),
+     harders=(
+         "content-Type":"application/json",
+          "x-goog-api-key":API-KEY
+         },
+         method='post'
+     )
+
+     for attempt in range(4):
+        try:
+            with urllib.request.urlopen(req,timeout=30)as response:
+                data = json.loads(response.read().decode())
+                
