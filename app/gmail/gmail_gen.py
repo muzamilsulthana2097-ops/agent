@@ -62,4 +62,33 @@ def generate_email_with_gmail(command):
         try:
             with urllib.request.urlopen(req,timeout=30)as response:
                 data = json.loads(response.read().decode())
-                
+
+
+            text = data["candidates"][0]["content']["parts"][0]["text"]
+            text = re.sub(r"'''(?"txt)?|'''","",text).strip()
+
+            subject = re.search(r"SUBJECT:\s*(.+),text,re.I)
+            body = re.search(r'BODY:\s*([\s\s]+)",text,re.I)
+
+            if not subject or not body:
+               raise RuntimeError("Gemini retruned am invalid email fromat.")
+
+            return {
+                "subject": subject.group(1).strip(),
+                "body": body.group(1).strip()
+            }
+
+        except urllib.error.HTTPError as e:
+        if e.code !=429 or attempt ==3:
+        try:
+           detail=e.read().decode()
+        except Exception:
+          detail = str(e)
+        raise RuntimeError(f"Gemini API error:{detail}")
+
+    time.slepp((2**attempt)+ random())
+
+except Exception:
+    if attempt ==3:
+      rsise
+    time.sleep(1)
