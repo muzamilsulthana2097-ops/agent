@@ -6,72 +6,71 @@ import random
 import urllib.request
 import urllib.error
 
-API_KEY = os.getenv("GEMINI_API_KEY","")
-MODEL = os.getenev("GEMINI_MODEL", "gemini-3.5-flash")
+API_KEY = os.getenv("GEMINI_API_KEY", "")
+MODEL = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
 
-def generate_email_with_gmail(command):
+def generate_email_with_gemini(command):
     if not API_KEY:
-        rasie RuntimeError("GEMINI_API_KEY is missing.")
+        raise RuntimeError("GEMINI_API_KEY is missing.")
 
-     prompt = f"""
-  you are a professional Gmail email writing assistant.
+    prompt = f"""
+You are a professional Gmail email writing assistant.
 
-  Convert the user's voice command into a professional email.
+Convert the user's voice command into a professional email.
 
-  Rules:
-  - Do not copy the command literally.
-  - Do not explain anything.
-  - Do not invent names, dates, prices, companies, attachments, or facts.
-  - Keep the email natural and concise
-  - Include an appropriate greeting and closing
+Rules:
+- Do not copy the command literally.
+- Do not explain anything.
+- Do not invent names, dates, prices, companies, attachments, or facts.
+- Keep the email natural and concise.
+- Include an appropriate greeting and closing.
 
-  Output exactly:
+Output exactly:
 
-  SUBJECT:<subject>
-  BODY:
-  <email body>
+SUBJECT: <subject>
+BODY:
+<email body>
 
-  User command:
-  {command}
-  """
+User command:
+{command}
+"""
 
-       url = (
-           f"https://generativelanguage.googleapis.com/"
-           f"v1beta/models/{MODEL}:generatecontent"
-       )
+    url = (
+        f"https://generativelanguage.googleapis.com/"
+        f"v1beta/models/{MODEL}:generateContent"
+    )
 
-       payload = {
-           "contents": [{"parts":[{"text": prompt}]}],
-           "generationConfig": {
-               "temperature":0.7,
-               "maxOutputTikens": 800
-           }
-       }
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 800
+        }
+    }
 
- req = urllib.request.Request(
-     url,
-     data=json.dumps(payload).encode(),
-     harders=(
-         "content-Type":"application/json",
-          "x-goog-api-key":API-KEY
-         },
-         method='post'
-     )
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode(),
+        headers={
+            "Content-Type": "application/json",
+            "x-goog-api-key": API_KEY
+        },
+        method="POST"
+    )
 
-     for attempt in range(4):
+    for attempt in range(4):
         try:
-            with urllib.request.urlopen(req,timeout=30)as response:
+            with urllib.request.urlopen(req, timeout=30) as response:
                 data = json.loads(response.read().decode())
 
+            text = data["candidates"][0]["content"]["parts"][0]["text"]
+            text = re.sub(r"```(?:text)?|```", "", text).strip()
 
-            text = data["candidates"][0]["content']["parts"][0]["text"]
-            text = re.sub(r"'''(?"txt)?|'''","",text).strip()
-
-            subject = re.search(r"SUBJECT:\s*(.+),text,re.I)
-            body = re.search(r'BODY:\s*([\s\s]+)",text,re.I)
+            subject = re.search(r"SUBJECT:\s*(.+)", text, re.I)
+            body = re.search(r"BODY:\s*([\s\S]+)", text, re.I)
 
             if not subject or not body:
-               raise RuntimeError("Gemini retruned am invalid email fromat.")
+                raise RuntimeError("Gemini returned an invalid email format.")
 
             return {
                 "subject": subject.group(1).strip(),
@@ -79,16 +78,16 @@ def generate_email_with_gmail(command):
             }
 
         except urllib.error.HTTPError as e:
-        if e.code !=429 or attempt ==3:
-        try:
-           detail=e.read().decode()
+            if e.code != 429 or attempt == 3:
+                try:
+                    detail = e.read().decode()
+                except Exception:
+                    detail = str(e)
+                raise RuntimeError(f"Gemini API error: {detail}")
+
+            time.sleep((2 ** attempt) + random.random())
+
         except Exception:
-          detail = str(e)
-        raise RuntimeError(f"Gemini API error:{detail}")
-
-    time.slepp((2**attempt)+ random())
-
-except Exception:
-    if attempt ==3:
-      rsise
-    time.sleep(1)
+            if attempt == 3:
+                raise
+            time.sleep(1)
